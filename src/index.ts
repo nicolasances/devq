@@ -15,10 +15,18 @@ const activeProcessing = new Set<string>(); // Track which messages are being pr
 app.post('/msg', (req: Request, res: Response) => {
 
     const msgId = `msg-${Date.now()}-${Math.random()}`;
+
+    const authHeader = req.get('authorization');
+
+    if (!authHeader) {
+        res.status(403).json({ error: 'Missing Authorization header' });
+        return;
+    }
     
     queue.push({
         payload: req.body,
         attempts: 0,
+        authHeader: authHeader,
     });
 
     console.log(`Message ${msgId} queued. Queue length: ${queue.length}`);
@@ -46,7 +54,12 @@ async function processMessage(msg: QueueMessage): Promise<void> {
     try {
         console.log(`Delivering message to endpoint ${CONSUMER_URL}`);
         
-        await axios.post(CONSUMER_URL, msg.payload, { timeout: 600000 });
+        await axios.post(CONSUMER_URL, msg.payload, {
+            timeout: 600000,
+            headers: {
+                Authorization: msg.authHeader
+            }
+        });
         
         console.log("Delivered successfully");
 
