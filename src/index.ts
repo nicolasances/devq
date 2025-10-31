@@ -10,7 +10,6 @@ const PORT = 8000;
 const CONSUMER_URL = "http://localhost:8081/galebroker/events/agent"
 
 const queue: QueueMessage[] = [];
-const activeProcessing = new Set<string>(); // Track which messages are being processed
 
 app.post('/msg', (req: Request, res: Response) => {
 
