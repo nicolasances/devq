@@ -16,6 +16,8 @@ app.post('/msg', (req: Request, res: Response) => {
 
     const msgId = `msg-${Date.now()}-${Math.random()}`;
 
+    console.log(`Message ${msgId} received with body ${JSON.stringify(req.body)}`);
+
     const authHeader = req.get('authorization');
 
     if (!authHeader) {
