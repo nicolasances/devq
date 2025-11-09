@@ -7,7 +7,8 @@ const app = express();
 app.use(express.json());
 
 const PORT = 8000;
-const CONSUMER_URL = "http://localhost:8081/galebroker/events/agent"
+// const CONSUMER_URL = "http://localhost:8081/galebroker/events/agent"
+const CONSUMER_URL = "http://localhost:8080/tomeagents/events/topic"
 
 const queue: QueueMessage[] = [];
 
