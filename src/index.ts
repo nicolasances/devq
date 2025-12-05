@@ -31,6 +31,7 @@ app.post('/msg', (req: Request, res: Response) => {
     }
 
     queue.push({
+        id: msgId,
         payload: req.body,
         attempts: 0,
         authHeader: authHeader,
@@ -38,7 +39,7 @@ app.post('/msg', (req: Request, res: Response) => {
 
     console.log(`Message ${msgId} queued. Queue length: ${queue.length}`);
 
-    res.status(200).json({ message: 'Message queued successfully' });
+    res.status(200).json({ message: `Message ${msgId} queued successfully` });
 
     setImmediate(processQueue);
 
@@ -66,7 +67,7 @@ async function processMessage(msg: QueueMessage): Promise<void> {
         let consumerURL = DEFAULT_CONSUMER_URL;
         if (CONSUMER_URL_MAP[msgType]) consumerURL = CONSUMER_URL_MAP[msgType];
 
-        console.log(`Delivering message to endpoint ${consumerURL}`);
+        console.log(`Delivering message ${msg.id} to endpoint ${consumerURL}`);
 
         await axios.post(consumerURL, msg.payload, {
             timeout: 600000,
@@ -75,11 +76,11 @@ async function processMessage(msg: QueueMessage): Promise<void> {
             }
         });
 
-        console.log("Delivered successfully");
+        console.log(`Message ${msg.id} delivered successfully`);
 
     } catch (err: any) {
 
-        console.error("Delivery failed:", err.message);
+        console.error(`Delivery failed for message ${msg.id}:`, err.message);
 
         msg.attempts = (msg.attempts ?? 0) + 1;
 
@@ -94,7 +95,7 @@ async function processMessage(msg: QueueMessage): Promise<void> {
 
         }
         else {
-            console.error("Dropping message after 3 failed attempts");
+            console.error(`Dropping message ${msg.id} after 3 failed attempts`);
         }
     }
 }
